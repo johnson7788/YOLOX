@@ -5,11 +5,11 @@
 参照 [README](../README.md) 安装 YOLOX.
 
 ## 1. 创建你的数据集
-**Step 1** Prepare your own dataset with images and labels first. For labeling images, you may use a tool like [Labelme](https://github.com/wkentaro/labelme) or [CVAT](https://github.com/openvinotoolkit/cvat).
+**Step 1** 首先准备好你自己的带有图像和标签的数据集。为了给图像贴标签，你可以使用一个工具，如 [Labelme](https://github.com/wkentaro/labelme) or [CVAT](https://github.com/openvinotoolkit/cvat).
 
-**Step 2** Then, you should write the corresponding Dataset Class which can load images and labels through "\_\_getitem\_\_" method. We currently support COCO format and VOC format.
+**Step 2** 然后，你应该编写相应的数据集类，它可以通过"\_\_getitem\_"方法加载图像和标签。我们目前支持COCO格式和VOC格式。
 
-You can also write the Dataset by you own. Let's take the [VOC](../yolox/data/datasets/voc.py#L151) Dataset file for example:
+你也可以自己编写数据集。我们以[VOC](./yolox/data/datasets/voc.py#L151)数据集文件为例:
 ```python
     @Dataset.resize_getitem
     def __getitem__(self, index):
@@ -21,19 +21,19 @@ You can also write the Dataset by you own. Let's take the [VOC](../yolox/data/da
         return img, target, img_info, img_id
 ```
 
-One more thing worth noting is that you should also implement "[pull_item](../yolox/data/datasets/voc.py#L129)" and "[load_anno](../yolox/data/datasets/voc.py#L121)" method for the Mosiac and MixUp augmentation.
+还有一点值得注意的是，你还应该为Mosiac和MixUp数据增强"[pull_item](.../yolox/data/datasets/voc.py#L129) "和"[load_anno](.../yolox/data/datasets/voc.py#L121) 方法。
 
-**Step 3** Prepare the evaluator. We currently have [COCO evaluator](../yolox/evaluators/coco_evaluator.py) and [VOC evaluator](../yolox/evaluators/voc_evaluator.py).
-If you have your own format data or evaluation metric, you may write your own evaluator.
+**Step 3** 准备评估员。我们目前有 [COCO evaluator](../yolox/evaluators/coco_evaluator.py) and [VOC evaluator](../yolox/evaluators/voc_evaluator.py).
+如果你有自己的格式数据或评估指标，你可以编写自己的评估器。
 
-**Step 4** Put your dataset under $YOLOX_DIR/datasets$, for VOC:
+**Step 4** 将您的数据集放在 $YOLOX_DIR/datasets$下，对于 VOC：
 ```shell
 ln -s /path/to/your/VOCdevkit ./datasets/VOCdevkit
 ```
-* The path "VOCdevkit" will be used in your exp file described in next section.Specifically, in "get_data_loader" and "get_eval_loader" function.
+* 路径 "VOCdevkit "将在下一节描述的exp文件中使用。特别是在 "get_data_loader "和 "get_eval_loader "函数中。
 
-## 2. Create your Exp file to control everything
-We put everything involved in a model to one single Exp file, including model setting, training setting, and testing setting.
+## 2. 创建exp文件以控制所有内容
+我们把模型中涉及的所有内容都放在一个单一的Exp文件中，包括模型设置、训练设置和测试设置。
 
 **A complete Exp file is at [yolox_base.py](../yolox/exp/yolox_base.py).** It may be too long to write for every exp, but you can inherit the base Exp file and only overwrite the changed part.
 
