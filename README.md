@@ -70,6 +70,7 @@ Step2. Use either -n or -f to specify your detector's config. For example:
 
 ```shell
 python tools/demo.py image -n yolox-s -c /path/to/your/yolox_s.pth.tar --path assets/dog.jpg --conf 0.3 --nms 0.65 --tsize 640 --save_result --device [cpu/gpu]
+python tools/demo.py image -n yolox-s -c model/yolox_s.pth --path assets/dog.jpg --conf 0.3 --nms 0.65 --tsize 640 --save_result --device cpu
 ```
 or
 ```shell
