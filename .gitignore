@@ -214,3 +214,4 @@ events.out.tfevents*
 .vim
 model
 YOLOX_outputs
+datasets/VOCdevkit

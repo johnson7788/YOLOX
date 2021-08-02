@@ -7,7 +7,7 @@
 ## 1. 创建你的数据集
 **Step 1** 首先准备好你自己的带有图像和标签的数据集。为了给图像贴标签，你可以使用一个工具，如 [Labelme](https://github.com/wkentaro/labelme) or [CVAT](https://github.com/openvinotoolkit/cvat).
 
-**Step 2** 然后，你应该编写相应的数据集类，它可以通过"\_\_getitem\_"方法加载图像和标签。我们目前支持COCO格式和VOC格式。
+**Step 2** 然后，你应该编写相应的数据集类，它可以通过"\_\_getitem\_"方法加载图像和标签。我们目前支持COCO数据集格式和VOC数据集格式。
 
 你也可以自己编写数据集。我们以[VOC](./yolox/data/datasets/voc.py#L151)数据集文件为例:
 ```python
@@ -23,14 +23,15 @@
 
 还有一点值得注意的是，你还应该为Mosiac和MixUp数据增强"[pull_item](.../yolox/data/datasets/voc.py#L129) "和"[load_anno](.../yolox/data/datasets/voc.py#L121) 方法。
 
-**Step 3** 准备评估员。我们目前有 [COCO evaluator](../yolox/evaluators/coco_evaluator.py) and [VOC evaluator](../yolox/evaluators/voc_evaluator.py).
+**Step 3** 准备评估。我们目前有 [COCO evaluator](../yolox/evaluators/coco_evaluator.py) and [VOC evaluator](../yolox/evaluators/voc_evaluator.py).
 如果你有自己的格式数据或评估指标，你可以编写自己的评估器。
 
 **Step 4** 将您的数据集放在 $YOLOX_DIR/datasets$下，对于 VOC：
+VOC下载： http://host.robots.ox.ac.uk/pascal/VOC/voc2007/，  下载链接: http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
 ```shell
 ln -s /path/to/your/VOCdevkit ./datasets/VOCdevkit
 ```
-* 路径 "VOCdevkit "将在下一节描述的exp文件中使用。特别是在 "get_data_loader "和 "get_eval_loader "函数中。
+* 路径 "VOCdevkit"将在下一节描述的exp文件中使用。特别是在 "get_data_loader "和 "get_eval_loader "函数中。
 
 ## 2. 创建exp文件以控制所有内容
 我们把模型中涉及的所有内容都放在一个单一的Exp文件中，包括模型设置、训练设置和测试设置。
@@ -64,9 +65,9 @@ class Exp(MyExp):
 ```bash
 python tools/train.py -f /path/to/your/Exp/file -d 8 -b 64 --fp16 -o -c /path/to/the/pretrained/weights
 ```
-或者yolox-s VOC进行训练：
+或者yolox-s VOC进行训练, -d 0表示使用第0个device。
 ```bash
-python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 8 -b 64 --fp16 -o -c /path/to/yolox_s.pth.tar
+python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 0 -b 64 --fp16 -o -c model/yolox_s.pth
 ```
 
 (不要担心预训练的权重和你自己的模型之间的检测头的形状不同，我们会处理的。)
