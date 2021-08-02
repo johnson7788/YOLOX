@@ -27,7 +27,9 @@
 如果你有自己的格式数据或评估指标，你可以编写自己的评估器。
 
 **Step 4** 将您的数据集放在 $YOLOX_DIR/datasets$下，对于 VOC：
-VOC下载： http://host.robots.ox.ac.uk/pascal/VOC/voc2007/，  下载链接: http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
+VOC2007下载： http://host.robots.ox.ac.uk/pascal/VOC/voc2007/，  下载链接: http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
+VOC2012下载: http://host.robots.ox.ac.uk/pascal/VOC/voc2012/index.html
+对应着yolox_voc_s.py文件的image_sets=[('2007', 'trainval'), ('2012', 'trainval')],行，这是2个数据集一起训练
 ```shell
 ln -s /path/to/your/VOCdevkit ./datasets/VOCdevkit
 ```
@@ -65,8 +67,11 @@ class Exp(MyExp):
 ```bash
 python tools/train.py -f /path/to/your/Exp/file -d 8 -b 64 --fp16 -o -c /path/to/the/pretrained/weights
 ```
-或者yolox-s VOC进行训练, -d 0表示使用第0个device。
+或者yolox-s VOC进行训练, -d 8表示使用第8个device。使用fp16进行训练
 ```bash
+python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 8 -b 64 --fp16 -o -c model/yolox_s.pth
+
+#使用第0个device
 python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 0 -b 64 --fp16 -o -c model/yolox_s.pth
 ```
 
