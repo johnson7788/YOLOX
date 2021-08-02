@@ -67,12 +67,12 @@ class Exp(MyExp):
 ```bash
 python tools/train.py -f /path/to/your/Exp/file -d 8 -b 64 --fp16 -o -c /path/to/the/pretrained/weights
 ```
-或者yolox-s VOC进行训练, -d 8表示使用第8个device。使用fp16进行训练
+或者yolox-s VOC进行训练, -d 8表示使用8个GPU device。使用fp16进行训练
 ```bash
 python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 8 -b 64 --fp16 -o -c model/yolox_s.pth
 
-#使用第0个device
-python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 0 -b 64 --fp16 -o -c model/yolox_s.pth
+#使用1个device
+python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 1 -b 64 --fp16 -o -c model/yolox_s.pth
 ```
 
 (不要担心预训练的权重和你自己的模型之间的检测头的形状不同，我们会处理的。)

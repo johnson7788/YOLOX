@@ -16,50 +16,50 @@ from yolox.utils import configure_nccl
 
 
 def make_parser():
-    parser = argparse.ArgumentParser("YOLOX train parser")
-    parser.add_argument("-expn", "--experiment-name", type=str, default=None)
-    parser.add_argument("-n", "--name", type=str, default=None, help="model name")
+    parser = argparse.ArgumentParser("YOLOX 训练配置parser")
+    parser.add_argument("-expn", "--experiment-name", type=str, default=None,help="此次实验的名字")
+    parser.add_argument("-n", "--name", type=str, default=None, help="模型的名字，是exps/default/ 下面的名字中的一个，和-f手动指定相斥，使用-n或-f中的一个即可")
 
-    # distributed
+    # 分布式
     parser.add_argument(
-        "--dist-backend", default="nccl", type=str, help="distributed backend"
+        "--dist-backend", default="nccl", type=str, help="使用哪种分布式协议"
     )
     parser.add_argument(
         "--dist-url", default=None, type=str, help="url used to set up distributed training"
     )
     parser.add_argument("-b", "--batch-size", type=int, default=64, help="batch size")
     parser.add_argument(
-        "-d", "--devices", default=None, type=int, help="device for training"
+        "-d", "--devices", default=1, type=int, help="使用几个GPU设备进行训练"
     )
     parser.add_argument(
-        "--local_rank", default=0, type=int, help="local rank for dist training"
+        "--local_rank", default=0, type=int, help="分布式训练，使用哪个rank"
     )
     parser.add_argument(
         "-f",
         "--exp_file",
         default=None,
         type=str,
-        help="plz input your expriment description file",
+        help="指定配置脚本，一些模型的和数据的配置，参考exps/example/yolox_voc/yolox_voc_s.py",
     )
     parser.add_argument(
-        "--resume", default=False, action="store_true", help="resume training"
+        "--resume", default=False, action="store_true", help="是否继续训练"
     )
     parser.add_argument("-c", "--ckpt", default=None, type=str, help="加载checkpoint文件，继续训练")
     parser.add_argument(
-        "-e", "--start_epoch", default=None, type=int, help="resume training start epoch"
+        "-e", "--start_epoch", default=None, type=int, help="继续训练时，从哪个epoch开始计数"
     )
     parser.add_argument(
-        "--num_machine", default=1, type=int, help="num of node for training"
+        "--num_machine", default=1, type=int, help="训练时的node数量"
     )
     parser.add_argument(
-        "--machine_rank", default=0, type=int, help="node rank for multi-node training"
+        "--machine_rank", default=0, type=int, help="多node训练时，node的 rank"
     )
     parser.add_argument(
         "--fp16",
         dest="fp16",
         default=True,
         action="store_true",
-        help="Adopting mix precision training.",
+        help="是否采用混合精度训练",
     )
     parser.add_argument(
         "-o",
@@ -67,11 +67,11 @@ def make_parser():
         dest="occumpy",
         default=False,
         action="store_true",
-        help="occumpy GPU memory first for training.",
+        help="占用GPU内存的首选训练",
     )
     parser.add_argument(
         "opts",
-        help="Modify config options using the command-line",
+        help="通过命令行来修改的config选项",
         default=None,
         nargs=argparse.REMAINDER,
     )
@@ -102,13 +102,16 @@ def main(exp, args):
 
 
 if __name__ == "__main__":
+    #解析配置
     args = make_parser().parse_args()
+    # 获取哪个配置文件，按照名字获取，还是按照文件获取，文件优先
     exp = get_exp(args.exp_file, args.name)
+    # 参数合并
     exp.merge(args.opts)
-
     num_gpu = torch.cuda.device_count() if args.devices is None else args.devices
+    # GPU的使用数量
     assert num_gpu <= torch.cuda.device_count()
-
+    #分布式url
     dist_url = "auto" if args.dist_url is None else args.dist_url
     launch(
         main, num_gpu, args.num_machine, backend=args.dist_backend,

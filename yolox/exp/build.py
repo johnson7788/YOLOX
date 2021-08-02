@@ -36,9 +36,7 @@ def get_exp_by_name(exp_name):
 
 def get_exp(exp_file, exp_name):
     """
-    get Exp object by file or name. If exp_file and exp_name
-    are both provided, get Exp by exp_file.
-
+    通过文件或名称获取Exp对象。如果同时提供exp_file和exp_name，则按exp_file获取Exp。
     Args:
         exp_file (str): file path of experiment.
         exp_name (str): name of experiment. "yolo-s",
