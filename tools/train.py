@@ -96,7 +96,7 @@ def main(exp, args):
     # set environment variables for distributed training
     configure_nccl()
     cudnn.benchmark = True
-
+    #初始化和训练， exp是训练的参数，args是命令传过来的参数
     trainer = Trainer(exp, args)
     trainer.train()
 

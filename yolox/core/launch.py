@@ -37,8 +37,8 @@ def launch(
 ):
     """
     Args:
-        main_func: a function that will be called by `main_func(*args)`
-        num_machines (int): the total number of machines
+        main_func: 主函数 `main_func(*args)`
+        num_machines (int): 使用的机器数量
         machine_rank (int): the rank of this machine (one per machine)
         dist_url (str): url to connect to for distributed training, including protocol
                        e.g. "tcp://127.0.0.1:8686".
@@ -47,6 +47,7 @@ def launch(
     """
     world_size = num_machines * num_gpus_per_machine
     if world_size > 1:
+        # 分布式训练
         # https://github.com/pytorch/pytorch/pull/14391
         # TODO prctl in spawned processes
 
@@ -65,6 +66,7 @@ def launch(
             daemon=False,
         )
     else:
+        #单台训练
         main_func(*args)
 
 

@@ -35,8 +35,8 @@ class Trainer:
     def __init__(self, exp, args):
         # init function only defines some basic attr, other attrs like model, optimizer are built in
         # before_train methods.
-        self.exp = exp
-        self.args = args
+        self.exp = exp  # 训练的参数
+        self.args = args   #命令行传过来的参数
 
         # training related attr
         self.max_epoch = exp.max_epoch
@@ -52,8 +52,9 @@ class Trainer:
         self.input_size = exp.input_size
         self.best_ap = 0
 
-        # metric record
+        # 记录metric
         self.meter = MeterBuffer(window_size=exp.print_interval)
+        # 模型和日志输出的目录 eg： './YOLOX_outputs/yolox_voc_s'
         self.file_name = os.path.join(exp.output_dir, args.experiment_name)
 
         if self.rank == 0 and os.path.exists("./" + args.experiment_name + "ip_add.txt"):
@@ -61,7 +62,7 @@ class Trainer:
 
         if self.rank == 0:
             os.makedirs(self.file_name, exist_ok=True)
-
+        #设置日志
         setup_logger(self.file_name, distributed_rank=self.rank, filename="train_log.txt", mode="a")
 
     def train(self):
@@ -121,7 +122,12 @@ class Trainer:
         )
 
     def before_train(self):
+        """
+        训练前的一些准备
+        """
+        #打印args
         logger.info("args: {}".format(self.args))
+        #打印exp参数
         logger.info("exp value:\n{}".format(self.exp))
 
         # model related init
