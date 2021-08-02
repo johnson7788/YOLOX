@@ -22,8 +22,8 @@ from .voc_classes import VOC_CLASSES
 
 class AnnotationTransform(object):
 
-    """Transforms a VOC annotation into a Tensor of bbox coords and label index
-    Initilized with a dictionary lookup of classnames to indexes
+    """
+    将一个VOC标注转化为一个Bbox Coords和标签索引的张量，用类名和索引的字典查询进行初始化。
 
     Arguments:
         class_to_ind (dict, optional): dictionary lookup of classnames -> indexes

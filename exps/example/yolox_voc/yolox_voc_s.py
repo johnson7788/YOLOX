@@ -29,16 +29,19 @@ class Exp(MyExp):
         dataset = VOCDetection(
             #数据的目录 eg: data_dir:
             data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
+            #数据集目录
             image_sets=[('2007', 'trainval')],
             # image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
+            # 输入的图片的尺寸(640, 640)
             img_size=self.input_size,
+            # 训练的图片变形，数据增强
             preproc=TrainTransform(
                 rgb_means=(0.485, 0.456, 0.406),
                 std=(0.229, 0.224, 0.225),
                 max_labels=50,
             ),
         )
-
+        #继续数据增强
         dataset = MosaicDetection(
             dataset,
             mosaic=not no_aug,
@@ -64,7 +67,7 @@ class Exp(MyExp):
         sampler = InfiniteSampler(
             len(self.dataset), seed=self.seed if self.seed else 0
         )
-
+        # 设置一个批次采样
         batch_sampler = YoloBatchSampler(
             sampler=sampler,
             batch_size=batch_size,
@@ -72,7 +75,7 @@ class Exp(MyExp):
             input_dimension=self.input_size,
             mosaic=not no_aug,
         )
-
+        # DataLoader相关参数
         dataloader_kwargs = {"num_workers": self.data_num_workers, "pin_memory": True}
         dataloader_kwargs["batch_sampler"] = batch_sampler
         train_loader = DataLoader(self.dataset, **dataloader_kwargs)
