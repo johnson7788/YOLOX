@@ -7,7 +7,7 @@ import torch.nn as nn
 
 
 class SiLU(nn.Module):
-    """export-friendly version of nn.SiLU()"""
+    """激活函数， export-friendly version of nn.SiLU()"""
 
     @staticmethod
     def forward(x):

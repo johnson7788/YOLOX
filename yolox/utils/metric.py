@@ -30,7 +30,7 @@ def get_total_and_free_memory_in_Mb(cuda_device):
 
 def occumpy_mem(cuda_device, mem_ratio=0.9):
     """
-    pre-allocate gpu memory for training to avoid memory Fragmentation.
+    提前分配GPU显存，防止训练时显存分片
     """
     total, used = get_total_and_free_memory_in_Mb(cuda_device)
     max_mem = int(total * mem_ratio)

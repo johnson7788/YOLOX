@@ -67,7 +67,7 @@ def make_parser():
         dest="occumpy",
         default=False,
         action="store_true",
-        help="占用GPU内存的首选训练",
+        help="训练开始前就占用GPU内存，防止显存分片",
     )
     parser.add_argument(
         "opts",

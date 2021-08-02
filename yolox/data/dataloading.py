@@ -14,8 +14,7 @@ from .samplers import YoloBatchSampler
 
 def get_yolox_datadir():
     """
-    get dataset dir of YOLOX. If environment variable named `YOLOX_DATADIR` is set,
-    this function will return value of the environment variable. Otherwise, use data
+    获取训练的目录，首先从环境变量获取`YOLOX_DATADIR`， 否则默认设置为./datasets
     """
     yolox_datadir = os.getenv("YOLOX_DATADIR", None)
     if yolox_datadir is None:

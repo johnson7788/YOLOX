@@ -136,42 +136,44 @@ class Trainer:
         logger.info("Model Summary: {}".format(get_model_info(model, self.exp.test_size)))
         model.to(self.device)
 
-        # solver related init
+        # 优化器相关初始化
         self.optimizer = self.exp.get_optimizer(self.args.batch_size)
-
+        # fp16运算
         if self.amp_training:
             model, optimizer = amp.initialize(model, self.optimizer, opt_level="O1")
 
-        # value of epoch will be set in `resume_train`
+        #集训训练模型或者从checkpoint初始化模型
         model = self.resume_train(model)
 
-        # data related init
+        # 数据相关初始化
         self.no_aug = self.start_epoch >= self.max_epoch - self.exp.no_aug_epochs
+        # train loader， 加载数据
         self.train_loader = self.exp.get_data_loader(
             batch_size=self.args.batch_size,
             is_distributed=self.is_distributed,
             no_aug=self.no_aug
         )
-        logger.info("init prefetcher, this might take one minute or less...")
+        logger.info("初始化 prefetcher, 可能会耗时1分钟左右")
         self.prefetcher = DataPrefetcher(self.train_loader)
-        # max_iter means iters per epoch
+        # 每个epoch的 max_iter 平均迭代次数
         self.max_iter = len(self.train_loader)
-
+        #学习计划
         self.lr_scheduler = self.exp.get_lr_scheduler(
             self.exp.basic_lr_per_img * self.args.batch_size, self.max_iter
         )
+        # 占用显存
         if self.args.occumpy:
             occumpy_mem(self.local_rank)
-
+        #是否是分布式
         if self.is_distributed:
             model = apex.parallel.DistributedDataParallel(model)
             # from torch.nn.parallel import DistributedDataParallel as DDP
             # model = DDP(model, device_ids=[self.local_rank], broadcast_buffers=False)
-
+        # Model Exponential Moving Average
         if self.use_model_ema:
             self.ema_model = ModelEMA(model, 0.9998)
             self.ema_model.updates = self.max_iter * self.start_epoch
-
+        # 模型训练
         self.model = model
         self.model.train()
 
@@ -264,7 +266,7 @@ class Trainer:
 
     def resume_train(self, model):
         if self.args.resume:
-            logger.info("resume training")
+            logger.info("继续训练模型")
             if self.args.ckpt is None:
                 ckpt_file = os.path.join(self.file_name, "latest" + "_ckpt.pth.tar")
             else:
@@ -286,7 +288,7 @@ class Trainer:
             logger.info("loaded checkpoint '{}' (epoch {})".format(self.args.resume, self.start_epoch))  # noqa
         else:
             if self.args.ckpt is not None:
-                logger.info("loading checkpoint for fine tuning")
+                logger.info("是从 checkpoint加载，已进行微调模型训练")
                 ckpt_file = self.args.ckpt
                 ckpt = torch.load(ckpt_file, map_location=self.device)["model"]
                 model = load_ckpt(model, ckpt)

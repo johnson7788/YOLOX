@@ -68,13 +68,13 @@ class Exp(BaseExp):
                 if isinstance(m, nn.BatchNorm2d):
                     m.eps = 1e-3
                     m.momentum = 0.03
-
+        #如果模型没有初始化，model无赋值，那么初始化模型,初始化主干网络和head
         if getattr(self, "model", None) is None:
             in_channels = [256, 512, 1024]
             backbone = YOLOPAFPN(self.depth, self.width, in_channels=in_channels)
             head = YOLOXHead(self.num_classes, self.width, in_channels=in_channels)
             self.model = YOLOX(backbone, head)
-
+        #初始化优化器相关
         self.model.apply(init_yolo)
         self.model.head.initialize_biases(1e-2)
         return self.model

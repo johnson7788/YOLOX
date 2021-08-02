@@ -27,6 +27,7 @@ class Exp(MyExp):
         )
 
         dataset = VOCDetection(
+            #数据的目录 eg: data_dir:
             data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
             image_sets=[('2007', 'trainval')],
             # image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
