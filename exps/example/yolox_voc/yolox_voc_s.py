@@ -25,7 +25,7 @@ class Exp(MyExp):
             InfiniteSampler,
             MosaicDetection,
         )
-
+        # 读取数据集
         dataset = VOCDetection(
             #数据的目录 eg: data_dir:
             data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
@@ -41,7 +41,7 @@ class Exp(MyExp):
                 max_labels=50,
             ),
         )
-        #继续数据增强
+        #数据增强,马赛克数据增强
         dataset = MosaicDetection(
             dataset,
             mosaic=not no_aug,

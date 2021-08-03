@@ -73,6 +73,9 @@ python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 8 -b 64 --fp16
 
 #使用1个device
 python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py -d 1 -b 64 --fp16 -o -c model/yolox_s.pth
+
+#VOC2007，目标检测，对应的标签
+{'aeroplane': 0, 'bicycle': 1, 'bird': 2, 'boat': 3, 'bottle': 4, 'bus': 5, 'car': 6, 'cat': 7, 'chair': 8, 'cow': 9, 'diningtable': 10, 'dog': 11, 'horse': 12, 'motorbike': 13, 'person': 14, 'pottedplant': 15, 'sheep': 16, 'sofa': 17, 'train': 18, 'tvmonitor': 19}
 ```
 
 (不要担心预训练的权重和你自己的模型之间的检测头的形状不同，我们会处理的。)

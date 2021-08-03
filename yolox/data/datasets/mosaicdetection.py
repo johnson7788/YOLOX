@@ -35,7 +35,7 @@ def get_mosaic_coordinate(mosaic_image, mosaic_index, xc, yc, w, h, input_h, inp
 
 
 class MosaicDetection(Dataset):
-    """Detection dataset wrapper that performs mixup for normal dataset."""
+    """检测对正常数据集执行混合的数据集装饰器。"""
 
     def __init__(
         self, dataset, img_size, mosaic=True, preproc=None,
@@ -47,7 +47,7 @@ class MosaicDetection(Dataset):
         Args:
             dataset(Dataset) : Pytorch dataset object.
             img_size (tuple):
-            mosaic (bool): enable mosaic augmentation or not.
+            mosaic (bool): 启用马赛克mosaic增强与否。
             preproc (func):
             degrees (float):
             translate (float):
@@ -76,6 +76,7 @@ class MosaicDetection(Dataset):
     @Dataset.resize_getitem
     def __getitem__(self, idx):
         if self.enable_mosaic:
+            #进行马赛克处理
             mosaic_labels = []
             input_dim = self._dataset.input_dim
             input_h, input_w = input_dim[0], input_dim[1]
@@ -88,6 +89,7 @@ class MosaicDetection(Dataset):
             indices = [idx] + [random.randint(0, len(self._dataset) - 1) for _ in range(3)]
 
             for i_mosaic, index in enumerate(indices):
+                # 获取每个图片和对应的label（bbox，labelid）
                 img, _labels, _, _ = self._dataset.pull_item(index)
                 h0, w0 = img.shape[:2]  # orig hw
                 scale = min(1. * input_h / h0, 1. * input_w / w0)

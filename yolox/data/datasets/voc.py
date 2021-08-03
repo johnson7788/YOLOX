@@ -35,37 +35,41 @@ class AnnotationTransform(object):
     """
 
     def __init__(self, class_to_ind=None, keep_difficult=True):
+        # 类别到id的索引，class_to_ind: {'aeroplane': 0, 'bicycle': 1, 'bird': 2, 'boat': 3, 'bottle': 4, 'bus': 5, 'car': 6, 'cat': 7, 'chair': 8, 'cow': 9, 'diningtable': 10, 'dog': 11, 'horse': 12, 'motorbike': 13, 'person': 14, 'pottedplant': 15, 'sheep': 16, 'sofa': 17, 'train': 18, 'tvmonitor': 19}
         self.class_to_ind = class_to_ind or dict(zip(VOC_CLASSES, range(len(VOC_CLASSES))))
+        # 是否保存VOC项目的困难的目标检测项目
         self.keep_difficult = keep_difficult
 
     def __call__(self, target):
         """
         Arguments:
-            target (annotation) : the target annotation to be made usable
-                will be an ET.Element
+            target (annotation) : 目标的标注，是解析xml后的 ET.Element格式
         Returns:
-            a list containing lists of bounding boxes  [bbox coords, class name]
+            返回 一个列表，包含了bboxe [bbox coords, class name]
         """
         res = np.empty((0, 5))
         for obj in target.iter("object"):
             difficult = int(obj.find("difficult").text) == 1
             if not self.keep_difficult and difficult:
                 continue
+            # eg： name： dog
             name = obj.find("name").text.lower().strip()
             bbox = obj.find("bndbox")
 
             pts = ["xmin", "ymin", "xmax", "ymax"]
-            bndbox = []
+            bndbox = []  #存储bbox，对应着name目标的bbox
             for i, pt in enumerate(pts):
                 cur_pt = int(bbox.find(pt).text) - 1
                 # scale height or width
                 # cur_pt = cur_pt / width if i % 2 == 0 else cur_pt / height
                 bndbox.append(cur_pt)
+            # name变成id
             label_idx = self.class_to_ind[name]
             bndbox.append(label_idx)
+            # 返回的结果格式 bbox和label的id的一个列表 [xmin, ymin, xmax, ymax, label_ind]
             res = np.vstack((res, bndbox))  # [xmin, ymin, xmax, ymax, label_ind]
             # img_id = target.find('filename').text[:-4]
-
+        #返回格式是，嵌套的列表的numpy格式, shape[3,5], 表示这张图片有3个目标，5表示bbox+labelid组成的列表
         return res  # [[xmin, ymin, xmax, ymax, label_ind], ... ]
 
 
@@ -94,7 +98,7 @@ class VOCDetection(Dataset):
         image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
         img_size=(416, 416),
         preproc=None,
-        target_transform=AnnotationTransform(),
+        target_transform=AnnotationTransform(),   #生成目标检测的类别的名称到id的映射
         dataset_name="VOC0712",
     ):
         super().__init__(img_size)
@@ -108,6 +112,7 @@ class VOCDetection(Dataset):
         self._imgpath = os.path.join("%s", "JPEGImages", "%s.jpg")
         self._classes = VOC_CLASSES
         self.ids = list()
+        # 读取文件 datasets/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt中的ids，对应着图片的id
         for (year, name) in image_sets:
             self._year = year
             rootpath = os.path.join(self.root, "VOC" + year)
@@ -120,7 +125,9 @@ class VOCDetection(Dataset):
         return len(self.ids)
 
     def load_anno(self, index):
+        # img_id： 图像的名字
         img_id = self.ids[index]
+        # 解析xml， eg：'/home/wac/johnson/johnson/YOLOX/datasets/VOCdevkit/VOC2007/Annotations/000552.xml'
         target = ET.parse(self._annopath % img_id).getroot()
         if self.target_transform is not None:
             target = self.target_transform(target)
@@ -128,24 +135,26 @@ class VOCDetection(Dataset):
         return target
 
     def pull_item(self, index):
-        """Returns the original image and target at an index for mixup
+        """在混合索引处返回原始图像和目标
 
-        Note: not using self.__getitem__(), as any transformations passed in
-        could mess up this functionality.
+        Note: not using self.__getitem__(), as any transformations passed in could mess up this functionality.
 
         Argument:
-            index (int): index of img to show
+            index (int): 图像的索引
         Return:
             img, target
         """
+        # self.ids，图像的名字， index是图像的位置索引
         img_id = self.ids[index]
+        # 读取图像，img，shape： (331, 500, 3)
         img = cv2.imread(self._imgpath % img_id, cv2.IMREAD_COLOR)
+        # 图片的高度，宽度
         height, width, _ = img.shape
-
+        # 加载标签
         target = self.load_anno(index)
-
+        # 图像的信息
         img_info = (width, height)
-
+        # 返回图像的numpy格式，标签：多个（bbox+labelid）组成的列表，img_info是图像的宽度和高度，图像的索引
         return img, target, img_info, index
 
     @Dataset.resize_getitem
