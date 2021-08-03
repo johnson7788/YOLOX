@@ -74,6 +74,7 @@ Step2. 使用-n或者-f指定要使用的detector的检测模型的配置
 ```shell
 使用-n指定模型的配置, -c指定预训练的模型参数，必须要要和-n指定的配置对应, -p指定图片，--conf是置信度
 python tools/demo.py image -n yolox-s -c /path/to/your/yolox_s.pth.tar --path assets/dog.jpg --conf 0.3 --nms 0.65 --tsize 640 --save_result --device [cpu/gpu]
+#是COCO 80分类训练的模型
 python tools/demo.py image -n yolox-s -c model/yolox_s.pth --path assets/dog.jpg --conf 0.3 --nms 0.65 --tsize 640 --save_result --device cpu
 ```
 or

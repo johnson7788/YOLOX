@@ -76,8 +76,7 @@ class AnnotationTransform(object):
 class VOCDetection(Dataset):
 
     """
-    VOC Detection Dataset Object
-
+    VOC数据集加载
     input is image, target is annotation
 
     Args:
@@ -102,6 +101,7 @@ class VOCDetection(Dataset):
         dataset_name="VOC0712",
     ):
         super().__init__(img_size)
+        # self.root, '/home/wac/johnson/johnson/YOLOX/datasets/VOCdevkit'
         self.root = data_dir
         self.image_set = image_sets
         self.img_size = img_size
