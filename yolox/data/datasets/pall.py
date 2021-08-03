@@ -38,35 +38,31 @@ class AnnotationTransform(object):
         # 类别到id的索引，class_to_ind: {'aeroplane': 0, 'bicycle': 1, 'bird': 2, 'boat': 3, 'bottle': 4, 'bus': 5, 'car': 6, 'cat': 7, 'chair': 8, 'cow': 9, 'diningtable': 10, 'dog': 11, 'horse': 12, 'motorbike': 13, 'person': 14, 'pottedplant': 15, 'sheep': 16, 'sofa': 17, 'train': 18, 'tvmonitor': 19}
         self.class_to_ind = class_to_ind or dict(zip(PALL_CLASSES, range(len(PALL_CLASSES))))
 
-    def __call__(self, target):
+    def __call__(self, label_path, height, width):
         """
         Arguments:
-            target (annotation) : 目标的标注，是解析xml后的 ET.Element格式
+            label_path (annotation) : 标签的txt文件
         Returns:
             返回 一个列表，包含了bboxe [bbox coords, class name]
         """
         res = np.empty((0, 5))
-        for obj in target.iter("object"):
-            difficult = int(obj.find("difficult").text) == 1
-            if not self.keep_difficult and difficult:
-                continue
-            # eg： name： dog
-            name = obj.find("name").text.lower().strip()
-            bbox = obj.find("bndbox")
-
-            pts = ["xmin", "ymin", "xmax", "ymax"]
-            bndbox = []  #存储bbox，对应着name目标的bbox
-            for i, pt in enumerate(pts):
-                cur_pt = int(bbox.find(pt).text) - 1
-                # scale height or width
-                # cur_pt = cur_pt / width if i % 2 == 0 else cur_pt / height
-                bndbox.append(cur_pt)
-            # name变成id
-            label_idx = self.class_to_ind[name]
-            bndbox.append(label_idx)
-            # 返回的结果格式 bbox和label的id的一个列表 [xmin, ymin, xmax, ymax, label_ind]
-            res = np.vstack((res, bndbox))  # [xmin, ymin, xmax, ymax, label_ind]
-            # img_id = target.find('filename').text[:-4]
+        with open(label_path, 'r') as f:
+            for line in f:
+                if not line:
+                    continue
+                line_split = line.split(' ')
+                assert len(line_split) == 5, "YOLO的标签格式必须是5列，分别是label_id, x, y, xmax, ymax"
+                # 获取左上角和右下角的坐标
+                label_id, x_center, y_center, width_percent, height_percent = line_split
+                x_center, y_center, width_percent, height_percent = float(x_center), float(y_center), float(
+                    width_percent), float(height_percent)
+                x0 = (x_center - width_percent / 2) * width
+                y0 = (y_center - height_percent / 2) * height
+                x1 = (x_center + width_percent / 2) * width
+                y1 = (y_center + height_percent / 2) * height
+                bndbox = [x0,y0,x1,y1,label_id]  #存储bbox，对应着name目标的bbox, "xmin", "ymin", "xmax", "ymax"
+                # 返回的结果格式 bbox和label的id的一个列表 [xmin, ymin, xmax, ymax, label_ind]
+                res = np.vstack((res, bndbox))  # [xmin, ymin, xmax, ymax, label_ind]
         #返回格式是，嵌套的列表的numpy格式, shape[3,5], 表示这张图片有3个目标，5表示bbox+labelid组成的列表
         return res  # [[xmin, ymin, xmax, ymax, label_ind], ... ]
 
@@ -106,30 +102,39 @@ class PDFDetection(Dataset):
         self.target_transform = target_transform
         self.name = dataset_name
         # 标签的路径
-        self._annopath = os.path.join("%s", "labels", "%s.txt")
+        self._annopath = os.path.join("%s","labels", "%s.txt")
         # 图片的路径
-        self._imgpath = os.path.join("%s", "images", "%s.jpg")
+        self._imgpath = os.path.join("%s","images","%s.jpg")
         self._classes = PALL_CLASSES
         self.ids = []
         # 读取文件 datasets/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt中的ids，对应着图片的id
         for dir in image_sets:
             # 数据的目录dir
             self._year = dir
-            image_path = os.path.join(self.root, dir)
+            # 图像目录下
+            train_path = os.path.join(self.root, dir)
+            image_path = os.path.join(train_path, "images")
             images = os.listdir(image_path)
             for image in images:
-                image_id = image.lstrip('.jpg')
-                self.ids.append((image_path, image_id))
+                image_id = image.rstrip('.jpg')
+                self.ids.append((train_path, image_id))
     def __len__(self):
         return len(self.ids)
 
-    def load_anno(self, index):
+    def load_anno(self, index, height, width):
+        """
+        加载图像的标签, 图像的宽度和高度
+        :param index:
+        :type index:
+        :return:
+        :rtype:
+        """
         # img_id： 图像的名字
         img_id = self.ids[index]
         # 解析xml， eg：'/home/wac/johnson/johnson/YOLOX/datasets/VOCdevkit/VOC2007/Annotations/000552.xml'
-        target = ET.parse(self._annopath % img_id).getroot()
-        if self.target_transform is not None:
-            target = self.target_transform(target)
+        label_path = self._annopath % img_id
+        assert os.path.exists(label_path), "标签不存在，请检查"
+        target = self.target_transform(label_path, height, width)
 
         return target
 
@@ -146,11 +151,13 @@ class PDFDetection(Dataset):
         # self.ids，图像的名字， index是图像的位置索引
         img_id = self.ids[index]
         # 读取图像，img，shape： (331, 500, 3)
-        img = cv2.imread(self._imgpath % img_id, cv2.IMREAD_COLOR)
+        img_path = self._imgpath % img_id
+        assert os.path.exists(img_path), "图像不存在，请检查"
+        img = cv2.imread(img_path, cv2.IMREAD_COLOR)
         # 图片的高度，宽度
         height, width, _ = img.shape
         # 加载标签
-        target = self.load_anno(index)
+        target = self.load_anno(index, height, width)
         # 图像的信息
         img_info = (width, height)
         # 返回图像的numpy格式，标签：多个（bbox+labelid）组成的列表，img_info是图像的宽度和高度，图像的索引

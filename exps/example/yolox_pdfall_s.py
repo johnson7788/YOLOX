@@ -43,7 +43,7 @@ class Exp(MyExp):
             preproc=TrainTransform(
                 rgb_means=(0.485, 0.456, 0.406),
                 std=(0.229, 0.224, 0.225),
-                max_labels=50,
+                max_labels=self.num_classes,
             ),
         )
         #数据增强,马赛克数据增强
