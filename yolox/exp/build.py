@@ -13,7 +13,7 @@ def get_exp_by_file(exp_file):
         current_exp = importlib.import_module(os.path.basename(exp_file).split(".")[0])
         exp = current_exp.Exp()
     except Exception:
-        raise ImportError("{} doesn't contains class named 'Exp'".format(exp_file))
+        raise ImportError("{} 检测发现类或者文件错误 'Exp'".format(exp_file))
     return exp
 
 
@@ -41,7 +41,7 @@ def get_exp(exp_file, exp_name):
         exp_file (str): file path of experiment.
         exp_name (str): name of experiment. "yolo-s",
     """
-    assert exp_file is not None or exp_name is not None, "plz provide exp file or exp name."
+    assert exp_file is not None or exp_name is not None, "请提供exp file 或 exp name."
     if exp_file is not None:
         return get_exp_by_file(exp_file)
     else:

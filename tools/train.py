@@ -19,7 +19,7 @@ def make_parser():
     parser = argparse.ArgumentParser("YOLOX 训练配置parser")
     parser.add_argument("-expn", "--experiment-name", type=str, default=None,help="此次实验的名字")
     parser.add_argument("-n", "--name", type=str, default=None, help="模型的名字，是exps/default/ 下面的名字中的一个，和-f手动指定相斥，使用-n或-f中的一个即可")
-
+    parser.add_argument( "-da", "--data_dir", default="/home/wac/johnson/project", type=str, help="训练和测试的数据目录")
     # 分布式
     parser.add_argument(
         "--dist-backend", default="nccl", type=str, help="使用哪种分布式协议"
