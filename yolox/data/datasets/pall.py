@@ -206,7 +206,7 @@ class PDFDetection(Dataset):
         return path
 
     def _write_voc_results_file(self, all_boxes):
-        for cls_ind, cls in enumerate(VOC_CLASSES):
+        for cls_ind, cls in enumerate(PALL_CLASSES):
             cls_ind = cls_ind
             if cls == "__background__":
                 continue
@@ -246,7 +246,7 @@ class PDFDetection(Dataset):
         print("Eval IoU : {:.2f}".format(iou))
         if output_dir is not None and not os.path.isdir(output_dir):
             os.mkdir(output_dir)
-        for i, cls in enumerate(VOC_CLASSES):
+        for i, cls in enumerate(PALL_CLASSES):
 
             if cls == "__background__":
                 continue
