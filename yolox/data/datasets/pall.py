@@ -56,6 +56,7 @@ class AnnotationTransform(object):
                 label_id, x_center, y_center, width_percent, height_percent = line_split
                 x_center, y_center, width_percent, height_percent = float(x_center), float(y_center), float(
                     width_percent), float(height_percent)
+                label_id = float(label_id)
                 x0 = (x_center - width_percent / 2) * width
                 y0 = (y_center - height_percent / 2) * height
                 x1 = (x_center + width_percent / 2) * width
@@ -121,7 +122,7 @@ class PDFDetection(Dataset):
     def __len__(self):
         return len(self.ids)
 
-    def load_anno(self, index, height, width):
+    def load_anno(self, index):
         """
         加载图像的标签, 图像的宽度和高度
         :param index:
@@ -134,7 +135,7 @@ class PDFDetection(Dataset):
         # 解析xml， eg：'/home/wac/johnson/johnson/YOLOX/datasets/VOCdevkit/VOC2007/Annotations/000552.xml'
         label_path = self._annopath % img_id
         assert os.path.exists(label_path), "标签不存在，请检查"
-        target = self.target_transform(label_path, height, width)
+        target = self.target_transform(label_path, self.height, self.width)
 
         return target
 
@@ -156,8 +157,10 @@ class PDFDetection(Dataset):
         img = cv2.imread(img_path, cv2.IMREAD_COLOR)
         # 图片的高度，宽度
         height, width, _ = img.shape
+        self.height = height
+        self.width = width
         # 加载标签
-        target = self.load_anno(index, height, width)
+        target = self.load_anno(index)
         # 图像的信息
         img_info = (width, height)
         # 返回图像的numpy格式，标签：多个（bbox+labelid）组成的列表，img_info是图像的宽度和高度，图像的索引
