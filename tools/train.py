@@ -42,6 +42,9 @@ def make_parser():
         help="指定配置脚本，一些模型的和数据的配置，参考exps/example/yolox_voc/yolox_voc_s.py",
     )
     parser.add_argument(
+        "-dw", "--depth_width", default="small", type=str, help="通过depth和width，控制模型是small，middle, 还是large，还是xlarge等"
+    )
+    parser.add_argument(
         "--resume", default=False, action="store_true", help="是否继续训练"
     )
     parser.add_argument("-c", "--ckpt", default=None, type=str, help="加载checkpoint文件，继续训练")

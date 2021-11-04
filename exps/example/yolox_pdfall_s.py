@@ -26,6 +26,19 @@ class Exp(MyExp):
             InfiniteSampler,
             MosaicDetection,
         )
+        # 更改模型的大小
+        if args.depth_width == "small":
+            self.depth = 0.33
+            self.width = 0.50
+        elif args.depth_width == "middle":
+            self.depth = 0.67
+            self.width = 0.75
+        elif args.depth_width == "large":
+            self.depth = 1.0
+            self.width = 1.0
+        elif args.depth_width == "xlarge":
+            self.depth = 1.33
+            self.width = 1.25
         if args and args.data_dir:
             data_dir = args.data_dir
         else:
